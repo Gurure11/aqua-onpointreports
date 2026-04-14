@@ -9,7 +9,7 @@
     *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font:14px/1.4 Arial,sans-serif}
     .wrap{max-width:1500px;margin:0 auto;padding:18px}.card{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:18px}
     .topbar,.hero,.grid,.form-grid,.kpis,.tabs,.toolbar,.stats,.progress-cards{display:grid;gap:14px}
-    .topbar{grid-template-columns:1fr auto auto auto auto auto;align-items:center}.hero{grid-template-columns:1.4fr 1fr;margin-top:16px}.toolbar{grid-template-columns:repeat(5,minmax(150px,1fr)) auto}
+    .topbar{grid-template-columns:1fr auto auto auto;align-items:center}.hero{grid-template-columns:1.4fr 1fr;margin-top:16px}.toolbar{grid-template-columns:repeat(5,minmax(150px,1fr)) auto}
     .grid.two{grid-template-columns:1fr 1fr}.grid.three{grid-template-columns:repeat(3,1fr)}.kpis{grid-template-columns:repeat(6,1fr);margin-top:16px}.tabs{grid-template-columns:repeat(5,1fr);margin-top:18px}.stats{grid-template-columns:repeat(4,1fr)}.progress-cards{grid-template-columns:repeat(2,1fr)}
     .tab{padding:12px;border:1px solid var(--line);border-radius:14px;background:#eef2f7;cursor:pointer;text-align:center;font-weight:700}.tab.active{background:#fff}.panel{display:none;margin-top:16px}.panel.active{display:block}
     .kpi{padding:16px;border:1px solid var(--line);border-radius:18px;background:#fff}.kpi .label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}.kpi .value{font-size:28px;font-weight:700;margin-top:8px}.kpi .sub{color:var(--muted);margin-top:4px}
@@ -103,17 +103,6 @@
     .subtle-title{margin:0 0 10px;font-size:13px;font-weight:700;color:#0b3b91;text-transform:uppercase;letter-spacing:.06em}
     @media (max-width:1100px){.reason-grid{grid-template-columns:1fr}}
 
-
-    .star-input{display:flex;gap:6px;align-items:center;min-height:46px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:#fff}
-    .star-input button{width:auto;background:transparent;color:#f59e0b;border:none;padding:0;font-size:22px;line-height:1;cursor:pointer;box-shadow:none}
-    .star-input button.off{color:#cbd5e1}
-    .star-input.readonly{background:#f8fafc}
-    .approval-pill{display:inline-block;padding:5px 10px;border-radius:999px;font-size:12px;font-weight:700}
-    .approval-pill.waiting{background:#fef3c7;color:#92400e}
-    .approval-pill.approved{background:#dcfce7;color:#166534}
-    .approval-pill.rejected{background:#fee2e2;color:#991b1b}
-    .session-note{font-size:12px;color:var(--muted);margin-top:6px}
-
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -123,8 +112,6 @@
     <div class="card topbar">
       <div><div class="muted">Onpoint Group</div><h1 style="margin:4px 0 0;font-size:28px">Dashboard</h1></div>
       <div id="connBadge" class="badge warn">Connecting</div>
-      <div id="userBadge" class="badge ok">Guest</div>
-      <button id="logoutBtn" type="button" class="secondary">Logout</button>
       <button id="testBtn" type="button">Test connection</button>
       <button id="refreshBtn" type="button">Refresh</button>
     </div>
@@ -243,8 +230,8 @@
             <div class="field span-2"><label>Actuals</label><input id="revAmount" type="number" min="0" step="0.01"></div>
             <div class="field span-2"><label>Budget</label><input id="revBudget" type="number" min="0" step="0.01"></div>
             <div class="field span-2"><label>Daily Budget</label><input id="revDailyBudget" type="number" min="0" step="0.01"></div>
-            <div class="field span-2"><label>Quality</label><div id="qualityStars" class="star-input" data-target="revQuality" aria-label="Quality stars"></div><input id="revQuality" type="hidden" value="0"></div>
-            <div class="field span-2"><label>Safety</label><div id="safetyStars" class="star-input" data-target="revSafety" aria-label="Safety stars"></div><input id="revSafety" type="hidden" value="0"></div>
+            <div class="field span-2"><label>Quality</label><input id="revQuality" type="number" min="0" max="100" value="80"></div>
+            <div class="field span-2"><label>Safety</label><input id="revSafety" type="number" min="0" value="0"></div>
             <div class="reason-box">
               <div class="subtle-title">Target not reached comments</div>
               <div class="reason-grid">
@@ -265,7 +252,6 @@
       </div>
       <div class="card" style="margin-top:16px"><h3 style="margin-top:0">Revenue Summary</h3><div id="revenueStats" class="stats"></div></div>
       <div class="card" style="margin-top:16px"><h3 style="margin-top:0">Daily Revenue transactions</h3><div class="table-wrap"><table id="dailyRevenueTransactionsTable"></table></div></div>
-      <div id="adminRightsCard" class="card" style="margin-top:16px;display:none"><h3 style="margin-top:0">User Rights</h3><div class="muted" style="margin-bottom:12px">Admin Manager can assign user rights.</div><div class="form-grid"><div class="field span-3"><label>User Name</label><input id="rightsUserName"></div><div class="field span-3"><label>Role</label><select id="rightsRole"><option>User</option><option>Manager</option><option>Admin Manager</option><option>Safety Manager</option></select></div><div class="field span-3"><label>Password</label><input id="rightsPassword" type="password"></div><div class="field span-3"><label>Rights</label><input id="rightsAccess" placeholder="daily_revenue,view,approve"></div><div class="field span-12"><button id="saveRightsBtn" type="button">Save User Rights</button></div></div></div>
     </div>
 
     <div class="panel" id="projectsPanel">
@@ -1639,17 +1625,6 @@ function executiveReportHtml(){
     .subtle-title{margin:0 0 10px;font-size:13px;font-weight:700;color:#0b3b91;text-transform:uppercase;letter-spacing:.06em}
     @media (max-width:1100px){.reason-grid{grid-template-columns:1fr}}
 
-
-    .star-input{display:flex;gap:6px;align-items:center;min-height:46px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:#fff}
-    .star-input button{width:auto;background:transparent;color:#f59e0b;border:none;padding:0;font-size:22px;line-height:1;cursor:pointer;box-shadow:none}
-    .star-input button.off{color:#cbd5e1}
-    .star-input.readonly{background:#f8fafc}
-    .approval-pill{display:inline-block;padding:5px 10px;border-radius:999px;font-size:12px;font-weight:700}
-    .approval-pill.waiting{background:#fef3c7;color:#92400e}
-    .approval-pill.approved{background:#dcfce7;color:#166534}
-    .approval-pill.rejected{background:#fee2e2;color:#991b1b}
-    .session-note{font-size:12px;color:var(--muted);margin-top:6px}
-
   </style></head><body><h1>${escapeHtml(title)}</h1><div class="muted" style="margin-bottom:14px">Generated on ${escapeHtml(new Date().toLocaleString())}</div>${clone.innerHTML}</body></html>`;
 }
 function exportExecutivePdf(){
@@ -2332,179 +2307,6 @@ function monthlyStraightlineForRevenue(costCenter, manager, projectName, dateVal
 function updateDashboardClock(){ const el = $('dashboardClockTime'); if (!el) return; const now = new Date(); el.textContent = now.toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}); }
 function startDashboardClock(){ updateDashboardClock(); if (window.dashboardClockTimer) clearInterval(window.dashboardClockTimer); window.dashboardClockTimer = setInterval(updateDashboardClock, 1000); }
 function init(){ bindTabs(); wireFilters(); wireProjectAdders(); wireExecutiveExports(); startDashboardClock(); $('testBtn').onclick = () => quickConnectionTest(); $('refreshBtn').onclick = () => loadData(); $('saveRevenueBtn').onclick = saveRevenue; $('saveProjectBtn').onclick = saveProject; $('saveInvoiceBtn').onclick = saveInvoice; $('savePaymentBtn').onclick = savePaymentReceived; $('revDate').value = $('projCreatedAt').value = $('invDate').value = $('payDate').value = todayISO(); $('periodFilter').innerHTML = PERIODS.map(p=>`<option ${p===state.filters.period?'selected':''}>${p}</option>`).join(''); if ($('revProjectName')) $('revProjectName').addEventListener('change', applyRememberedRevenueBudgets); if ($('revManager')) $('revManager').addEventListener('change', applyRememberedRevenueBudgets); if ($('revCostCenter')) $('revCostCenter').addEventListener('change', applyRememberedRevenueBudgets); $('diagnostics').textContent = 'Waiting for first load...'; loadData(); }
-
-const LOGIN_SCRIPT_URL = 'PASTE_YOUR_LOGIN_WEB_APP_URL_HERE';
-const SESSION_STORAGE_KEY = 'onpoint_dashboard_session_v1';
-const ROLE_ADMIN = 'Admin Manager';
-const ROLE_SAFETY = 'Safety Manager';
-
-function getSession(){
-  try { return JSON.parse(localStorage.getItem(SESSION_STORAGE_KEY) || '{}'); } catch(e){ return {}; }
-}
-function setSession(session){
-  localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session || {}));
-}
-function requireSession(){
-  const session = getSession();
-  if (!session || !session.userName) { window.location.href = 'login.html'; return null; }
-  return session;
-}
-function currentRole(){ const s=getSession(); return text(s.role || 'User'); }
-function isAdminManager(){ return currentRole() === ROLE_ADMIN; }
-function isSafetyManager(){ return currentRole() === ROLE_SAFETY || isAdminManager(); }
-function updateUserBadge(){
-  const session = getSession();
-  if ($('userBadge')) $('userBadge').textContent = session.userName ? `${session.userName} • ${session.role || 'User'}` : 'Guest';
-  if ($('adminRightsCard')) $('adminRightsCard').style.display = isAdminManager() ? '' : 'none';
-}
-function logoutUser(){ localStorage.removeItem(SESSION_STORAGE_KEY); window.location.href='login.html'; }
-function makeStarInput(containerId, hiddenId, editable){
-  const wrap = $(containerId); const hidden=$(hiddenId); if(!wrap || !hidden) return;
-  const starCount = Math.max(0, Math.min(5, Math.round((num(hidden.value)||0)/20)));
-  wrap.innerHTML = '';
-  wrap.classList.toggle('readonly', !editable);
-  for (let i=1;i<=5;i++){
-    const btn=document.createElement('button');
-    btn.type='button';
-    btn.innerHTML='★';
-    if (i>starCount) btn.classList.add('off');
-    if (!editable) btn.disabled = true;
-    btn.onclick=()=>{ hidden.value = String(i*20); makeStarInput(containerId, hiddenId, editable); };
-    wrap.appendChild(btn);
-  }
-  const note=document.createElement('span');
-  note.className='session-note';
-  note.textContent=`${num(hidden.value)||0}%`;
-  wrap.appendChild(note);
-}
-function setupStars(){
-  makeStarInput('qualityStars','revQuality', isSafetyManager());
-  makeStarInput('safetyStars','revSafety', isSafetyManager());
-}
-function approvalBadge(status){
-  const s = text(status || 'Waiting Approval') || 'Waiting Approval';
-  const cls = /approved/i.test(s) ? 'approved' : (/reject/i.test(s) ? 'rejected' : 'waiting');
-  return `<span class="approval-pill ${cls}">${escapeHtml(s)}</span>`;
-}
-function managerGraphRows(period = state.filters.period){
-  return managerPerformanceRows(period).filter(r => num(r.Actual) > 0).slice().sort((a,b)=>(num(a.Actual)-num(b.Actual)) || (num(a.Straightline)-num(b.Straightline)) || a.Manager.localeCompare(b.Manager));
-}
-function managerPerformanceSectionRows(period = state.filters.period){
-  return managerPerformanceRows(period).filter(r => num(r.Actual) > 0).slice().sort((a,b)=>a.Manager.localeCompare(b.Manager));
-}
-const _origMapRevenueRow = mapRevenueRow;
-mapRevenueRow = function(r){
-  const row = _origMapRevenueRow(r);
-  row.ApprovalStatus = text(r.ApprovalStatus || r['Approval Status'] || rowVal(r,14) || 'Approved');
-  row.SubmittedBy = text(r.SubmittedBy || r['Submitted By'] || rowVal(r,15));
-  row.ApprovedBy = text(r.ApprovedBy || r['Approved By'] || rowVal(r,16));
-  row.Quality = num(r.Quality || r['Quality %'] || rowVal(r,17) || row.Quality || 0);
-  row.Safety = num(r.Safety || r['Safety %'] || rowVal(r,18) || row.Safety || 0);
-  return row;
-};
-const _origRenderPerformanceSection = renderPerformanceSection;
-renderPerformanceSection = function(){
-  const rows = managerPerformanceSectionRows(state.filters.period);
-  buildTable($('performanceManagerTable'), [
-    {label:'Manager'},
-    {label:'Actual', class:'right'},
-    {label:'Projected', class:'right'},
-    {label:'Straight-line', class:'right'},
-    {label:'Actual vs Projected %', class:'right'},
-    {label:'Actual vs Straight-line %', class:'right'}
-  ], rows.map(r => [
-    escapeHtml(r.Manager), money(r.Actual), money(r.Projected), money(r.Straightline),
-    `<span class="badge ${perfBadgeClass(r.ActualVsProjectedPct)}">${r.ActualVsProjectedPct}%</span>`,
-    `<span class="badge ${perfBadgeClass(r.ActualVsStraightPct)}">${r.ActualVsStraightPct}%</span>`
-  ]));
-  const snap = performanceSnapshot(state.filters.period);
-  $('performanceSummaryStats').innerHTML = [
-    ['Actual', money(snap.actual), `${state.filters.period} / Revenue sheet`],
-    ['Projected', money(snap.projected), `${state.filters.period} / Revenue sheet`],
-    ['Straight-line', money(snap.straight), `${state.filters.period} / Orders sheet`],
-    ['Managers', String(rows.length), 'Filtered results']
-  ].map(([a,b,c])=>`<div class="kpi"><div class="label">${a}</div><div class="value">${b}</div><div class="sub">${c}</div></div>`).join('');
-  renderPerformanceSectionCharts(rows);
-  renderCostCenterPerformance();
-};
-const _origRenderSummary = renderSummary;
-renderSummary = function(){
-  _origRenderSummary();
-  const dailyRows = state.revenue.slice().sort((a,b)=>(a.Date < b.Date ? 1 : -1)).slice(0,100);
-  if ($('dailyRevenueTransactionsTable')) buildTable($('dailyRevenueTransactionsTable'), [
-    {label:'Date'},{label:'Manager'},{label:'CostCenter'},{label:'ProjectName'},{label:'Actuals',class:'right'},{label:'Budget',class:'right'},{label:'Daily Budget',class:'right'},{label:'Quality',class:'right'},{label:'Safety',class:'right'},{label:'Approval Status'},{label:'Submitted By'},{label:'Action'}
-  ], dailyRows.map(r => {
-    const canApprove = isAdminManager() && !/approved/i.test(text(r.ApprovalStatus));
-    const btn = canApprove ? `<button type="button" onclick="approveRevenueEntry('${escapeHtml(r.Date)}','${escapeHtml(r.Manager)}','${escapeHtml(r.CostCenter)}','${escapeHtml(r.ProjectName)}')">Approve</button>` : '';
-    return [escapeHtml(r.Date), escapeHtml(r.Manager), escapeHtml(r.CostCenter), escapeHtml(r.ProjectName), money(revenueActualValue(r)), money(revenueProjectedValue(r,'Monthly')), money(revenueProjectedValue(r,'Daily')), `${num(r.Quality)}%`, `${num(r.Safety)}%`, approvalBadge(r.ApprovalStatus), escapeHtml(r.SubmittedBy || ''), btn];
-  }));
-};
-const _origSaveRevenue = saveRevenue;
-saveRevenue = async function(){
-  const session = requireSession(); if (!session) return;
-  const date = $('revDate').value || todayISO();
-  const manager = $('revManager').value;
-  const costCenter = $('revCostCenter').value;
-  const projectName = $('revProjectName').value;
-  const monthlyProjectedBudget = num($('revBudget').value) || monthlyProjectedBudgetFor(costCenter, manager, projectName);
-  const dailyProjectedBudget = num($('revDailyBudget').value) || +(monthlyProjectedBudget / PROJECTED_WORK_DAYS_PER_MONTH).toFixed(2);
-  const dailyRevenue = num($('revAmount').value);
-  const monthlyStraightlineBudget = monthlyStraightlineForRevenue(costCenter, manager, projectName, date);
-  const dayCount = Math.max(daysInMonth(date), 1);
-  const dailyStraightlineBudget = monthlyStraightlineBudget ? (monthlyStraightlineBudget / dayCount) : 0;
-  const meta = managerDashboardRevenueMeta(manager, costCenter, projectName);
-  const payload = {
-    action:'addRevenue', date, costCenter, category:'Daily Revenue', manager, projectName,
-    monthlyProjectedBudget, monthlyStraightlineBudget, dailyProjectedBudget, dailyStraightlineBudget, dailyRevenue,
-    invoicesIssued:0, paymentsReceived:0, confirmed:meta.confirmed, forecast:meta.forecast,
-    approvalStatus:'Waiting Approval', submittedBy:session.userName, approvedBy:'',
-    quality:num($('revQuality').value), safety:num($('revSafety').value),
-    qualityStars: Math.round(num($('revQuality').value)/20), safetyStars: Math.round(num($('revSafety').value)/20)
-  };
-  if (!payload.date || !payload.manager || !payload.costCenter || !payload.projectName || payload.dailyRevenue <= 0) return alert('Complete the revenue fields first.');
-  const btn=$('saveRevenueBtn'); const old=btn.textContent; btn.textContent='⟳ Synchronising.'; btn.classList.add('btn-loading');
-  try {
-    const res = await postAction(payload);
-    await loadData();
-    $('revAmount').value='';
-    if (isSafetyManager()) { $('revQuality').value='0'; $('revSafety').value='0'; setupStars(); }
-    renderSummary();
-    showToast(res.message || 'Daily revenue saved and waiting approval','success');
-  } catch (e) {
-    showToast(`Daily revenue was not saved: ${e.message}`,'error');
-    alert(`Daily revenue was not saved.\n\n${e.message}`);
-  } finally { btn.textContent=old; btn.classList.remove('btn-loading'); }
-};
-async function approveRevenueEntry(date, manager, costCenter, projectName){
-  if (!isAdminManager()) return alert('Only Admin Manager can approve.');
-  try {
-    await postAction({ action:'approveRevenue', date, manager, costCenter, projectName, approvedBy:getSession().userName });
-    await loadData();
-    showToast('Revenue entry approved','success');
-  } catch(e){ alert('Approval failed\n\n' + e.message); }
-}
-async function saveUserRights(){
-  if (!isAdminManager()) return alert('Only Admin Manager can assign user rights.');
-  const userName = $('rightsUserName')?.value || '';
-  const role = $('rightsRole')?.value || 'User';
-  const password = $('rightsPassword')?.value || '';
-  const access = $('rightsAccess')?.value || '';
-  if (!userName || !password) return alert('Enter username and password.');
-  try {
-    await postAction({ action:'saveUserRights', userName, role, password, access, assignedBy:getSession().userName });
-    showToast('User rights saved','success');
-    $('rightsUserName').value=''; $('rightsPassword').value=''; $('rightsAccess').value='';
-  } catch(e){ alert('Could not save user rights\n\n' + e.message); }
-}
-const _origInit = init;
-init = function(){
-  const session = requireSession(); if (!session) return;
-  _origInit();
-  updateUserBadge();
-  setupStars();
-  if ($('logoutBtn')) $('logoutBtn').onclick = logoutUser;
-  if ($('saveRightsBtn')) $('saveRightsBtn').onclick = saveUserRights;
-};
 document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
