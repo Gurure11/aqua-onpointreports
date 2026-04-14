@@ -5,58 +5,238 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Onpoint Group Login</title>
   <style>
-    :root{--bg:#eef4ff;--card:#ffffff;--line:#cfe0ff;--text:#122033;--muted:#58708f;--primary:#0b3b91;--shadow:0 16px 34px rgba(29,78,216,.10)}
-    *{box-sizing:border-box} body{margin:0;background:var(--bg);font:14px/1.4 Arial,sans-serif;color:var(--text);display:flex;min-height:100vh;align-items:center;justify-content:center;padding:24px}
-    .card{width:min(460px,100%);background:var(--card);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:24px}
-    h1{margin:0 0 6px;color:var(--primary)} .muted{color:var(--muted)}
-    .field{display:grid;gap:6px;margin-top:14px} label{font-size:12px;font-weight:700;text-transform:uppercase;color:var(--muted)}
-    input,button{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:14px;font:inherit}
-    button{margin-top:16px;background:linear-gradient(135deg,#0b3b91 0%,#1d4ed8 100%);color:#fff;cursor:pointer;border:none}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.status{margin-top:14px;font-size:13px;color:var(--muted)}
-    .note{margin-top:16px;padding:12px;border:1px solid var(--line);border-radius:14px;background:#f8fbff}
+    :root{
+      --bg:#eef4ff;--card:#ffffff;--line:#cfe0ff;--text:#122033;--muted:#58708f;
+      --primary:#0b3b91;--primary2:#1d4ed8;--green:#15803d;--red:#b91c1c;
+      --shadow:0 16px 34px rgba(29,78,216,.10)
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:var(--bg);
+      font:14px/1.4 Arial,sans-serif;
+      color:var(--text);
+      display:flex;
+      min-height:100vh;
+      align-items:center;
+      justify-content:center;
+      padding:24px
+    }
+    .card{
+      width:min(560px,100%);
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:24px
+    }
+    h1{margin:0 0 6px;color:var(--primary)}
+    h2{margin:22px 0 8px;color:var(--primary);font-size:18px}
+    .muted{color:var(--muted)}
+    .field{display:grid;gap:6px;margin-top:14px}
+    label{font-size:12px;font-weight:700;text-transform:uppercase;color:var(--muted)}
+    input,select,button{
+      width:100%;
+      padding:12px 14px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      font:inherit
+    }
+    input,select{background:#fff;color:var(--text)}
+    button{
+      margin-top:16px;
+      background:linear-gradient(135deg,var(--primary) 0%,var(--primary2) 100%);
+      color:#fff;
+      cursor:pointer;
+      border:none
+    }
+    .secondary{
+      background:#fff !important;
+      color:var(--text) !important;
+      border:1px solid var(--line) !important
+    }
+    .success{background:var(--green) !important}
+    .danger{background:var(--red) !important}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .status{
+      margin-top:14px;
+      font-size:13px;
+      min-height:18px;
+      color:var(--muted)
+    }
+    .divider{height:1px;background:var(--line);margin:20px 0}
+    @media (max-width:640px){.row{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
   <div class="card">
     <div class="muted">Onpoint Group</div>
     <h1>Login</h1>
-    <div class="muted">Use the user details stored on Manager Dashboard → login tab.</div>
-    <div class="field"><label>User Name</label><input id="userName" autocomplete="username"></div>
-    <div class="field"><label>Password</label><input id="password" type="password" autocomplete="current-password"></div>
+    <div class="muted">Sign in with your existing account or register a new user below.</div>
+
+    <div class="field">
+      <label>User Name</label>
+      <input id="userName" autocomplete="username" />
+    </div>
+
+    <div class="field">
+      <label>Password</label>
+      <input id="password" type="password" autocomplete="current-password" />
+    </div>
+
     <div class="row">
       <button id="loginBtn" type="button">Login</button>
-      <button id="clearBtn" type="button" style="background:#fff;color:#122033;border:1px solid var(--line)">Clear</button>
+      <button id="clearBtn" type="button" class="secondary">Clear</button>
     </div>
-    <div id="status" class="status">Waiting for login...</div>
-    <div class="note">
-      <strong>Login tab headlines</strong><br>
-      UserName	PasswordHash	Role	AccessRights	IsActive	AssignedBy	LastLogin	CreatedAt
+
+    <div class="divider"></div>
+
+    <h2>New User Registration</h2>
+    <div class="muted">Create a new user that will be saved into your login sheet.</div>
+
+    <div class="field">
+      <label>New User Name</label>
+      <input id="newUserName" />
     </div>
+
+    <div class="field">
+      <label>New Password</label>
+      <input id="newPassword" type="password" />
+    </div>
+
+    <div class="field">
+      <label>Select Role</label>
+      <select id="newRole">
+        <option value="Admin Manager">Admin Manager</option>
+        <option value="Manager" selected>Manager</option>
+        <option value="User">User</option>
+        <option value="Safety Manager">Safety Manager</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Access Rights</label>
+      <input id="newAccessRights" placeholder="Example: Daily Revenue, Invoices, Approvals" />
+    </div>
+
+    <div class="row">
+      <button id="createUserBtn" type="button" class="success">Register New User</button>
+      <button id="clearCreateBtn" type="button" class="secondary">Clear Registration</button>
+    </div>
+
+    <div id="status" class="status">Waiting...</div>
   </div>
+
 <script>
-const LOGIN_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxO2RUSZ4mQQnj4h5rhHsHGGjxlGZQszz5dwh1-oKlBNqu2rW68NkAzbodPtSXjOv91EA/exec';
+const LOGIN_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbydpOk6PVm2d9RfokDjc5VDXDjjvWih3-Zqj6vYRM3pWZB1rQ1lD91LgyP27XbIIWP9gA/exec';
 const SESSION_STORAGE_KEY = 'onpoint_dashboard_session_v1';
 const DASHBOARD_FILE = 'onpoint_dashboard_with_login_approval.html';
 const $ = id => document.getElementById(id);
-function setStatus(msg){ $('status').textContent = msg; }
+
+function setStatus(msg, isError=false){
+  const el = $('status');
+  el.textContent = msg;
+  el.style.color = isError ? '#b91c1c' : '#58708f';
+}
+
+function validScriptUrl(url){
+  return /^https:\\/\\/script\\.google\\.com\\/macros\\/s\\//.test(url || '');
+}
+
+async function postJson(payload){
+  const resp = await fetch(LOGIN_SCRIPT_URL, {
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify(payload)
+  });
+  const data = await resp.json();
+  if (!data.success) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
 async function login(){
   const userName = $('userName').value.trim();
   const password = $('password').value;
-  if (!userName || !password) return setStatus('Enter user name and password.');
-  if (!/^https:\/\/script\.google\.com\/macros\/s\//.test(LOGIN_SCRIPT_URL)) return setStatus('Paste your deployed login Apps Script URL into LOGIN_SCRIPT_URL first.');
+
+  if (!userName || !password) return setStatus('Enter user name and password.', true);
+  if (!validScriptUrl(LOGIN_SCRIPT_URL)) return setStatus('Paste your deployed Apps Script URL into LOGIN_SCRIPT_URL first.', true);
+
   setStatus('Signing in...');
   try {
-    const resp = await fetch(LOGIN_SCRIPT_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({ action:'loginUser', userName, password }) });
-    const data = await resp.json();
-    if (!data.success) throw new Error(data.error || 'Login failed');
+    const data = await postJson({
+      action:'loginUser',
+      userName,
+      password
+    });
+
     localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(data.session));
     setStatus(`Welcome ${data.session.userName} (${data.session.role})`);
     window.location.href = DASHBOARD_FILE;
-  } catch (e) { setStatus(e.message); }
+  } catch (e) {
+    setStatus(e.message, true);
+  }
 }
+
+async function createUser(){
+  const userName = $('newUserName').value.trim();
+  const password = $('newPassword').value;
+  const role = $('newRole').value;
+  const accessRights = $('newAccessRights').value.trim();
+
+  if (!userName || !password || !role) {
+    return setStatus('Enter new user name, password and role.', true);
+  }
+  if (!validScriptUrl(LOGIN_SCRIPT_URL)) {
+    return setStatus('Paste your deployed Apps Script URL into LOGIN_SCRIPT_URL first.', true);
+  }
+
+  setStatus('Creating user...');
+  try {
+    const session = JSON.parse(localStorage.getItem(SESSION_STORAGE_KEY) || 'null');
+    const assignedBy = session?.userName || 'System';
+
+    const data = await postJson({
+      action:'createUser',
+      userName,
+      password,
+      role,
+      accessRights,
+      assignedBy
+    });
+
+    setStatus(`User created successfully: ${data.userName}`);
+    clearCreateUser();
+  } catch (e) {
+    setStatus(e.message, true);
+  }
+}
+
+function clearLogin(){
+  $('userName').value = '';
+  $('password').value = '';
+  setStatus('Login fields cleared.');
+}
+
+function clearCreateUser(){
+  $('newUserName').value = '';
+  $('newPassword').value = '';
+  $('newRole').value = 'Manager';
+  $('newAccessRights').value = '';
+}
+
 $('loginBtn').onclick = login;
-$('clearBtn').onclick = () => { $('userName').value=''; $('password').value=''; setStatus('Cleared.'); };
-document.addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+$('clearBtn').onclick = clearLogin;
+$('createUserBtn').onclick = createUser;
+$('clearCreateBtn').onclick = () => {
+  clearCreateUser();
+  setStatus('Registration fields cleared.');
+};
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.activeElement && ['userName','password'].includes(document.activeElement.id)) {
+    login();
+  }
+});
 </script>
 </body>
 </html>
