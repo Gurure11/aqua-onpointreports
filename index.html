@@ -104,14 +104,23 @@
     @media (max-width:1100px){.reason-grid{grid-template-columns:1fr}}
 
 
-    .auth-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;z-index:10000;padding:20px}
-    .auth-card{width:min(460px,100%);background:#fff;border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:22px}
+    .auth-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;z-index:10000;padding:20px;overflow:auto;-webkit-overflow-scrolling:touch}
+    .auth-card{width:min(460px,100%);max-width:100%;max-height:min(92vh,900px);overflow:auto;background:#fff;border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:22px}
     .auth-card h2{margin:0 0 8px;font-size:24px;color:#0b3b91}.auth-card p{margin:0 0 14px;color:var(--muted)}
-    .auth-grid{display:grid;gap:12px}.auth-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}.auth-actions button{width:auto;min-width:120px}
+    .auth-grid{display:grid;gap:12px}.auth-actions{display:flex;gap:10px;justify-content:flex-end;align-items:center;flex-wrap:wrap;margin-top:8px}.auth-actions button{width:auto;min-width:120px}
     .topbar-user{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}.role-pill{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:#dbeafe;color:#0b3b91;font-size:12px;font-weight:700}
     .hidden-by-role{display:none !important}.readonly-block{opacity:.65;pointer-events:none}
     .approval-shell,.review-shell{margin-top:16px}.stack-actions{display:flex;gap:8px;flex-wrap:wrap}.mini-input{padding:8px 10px;border-radius:10px;border:1px solid var(--line);width:100%}
     .login-meta{font-size:12px;color:var(--muted);margin-top:10px}.small-btn{width:auto;min-width:90px;padding:8px 12px;border-radius:10px}
+
+    @media (max-width:640px){
+      .auth-overlay{padding:12px;align-items:flex-start}
+      .auth-card{width:100%;padding:16px;border-radius:18px;margin:0 auto}
+      .auth-card h2{font-size:22px}
+      .auth-actions{flex-direction:column;align-items:stretch}
+      .auth-actions button{width:100%;min-width:0}
+      .login-meta{line-height:1.5}
+    }
 
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -127,7 +136,7 @@
         <div class="field"><label>Username</label><input id="loginUsername" autocomplete="username" placeholder="Enter username"></div>
         <div class="field"><label>Password</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Enter password"></div>
       </div>
-      <div class="auth-grid hidden-by-role" id="registerFields" style="display:none">
+      <div class="auth-grid" id="registerFields" style="display:none">
         <div class="field"><label>Full Name</label><input id="registerFullName" placeholder="Enter full name"></div>
         <div class="field"><label>Email</label><input id="registerEmail" type="email" autocomplete="email" placeholder="Enter email"></div>
         <div class="field"><label>Username</label><input id="registerUsername" autocomplete="username" placeholder="Choose username"></div>
