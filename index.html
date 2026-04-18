@@ -135,8 +135,8 @@ th { background:#eef4ff; color:var(--royal-blue-dark); }
           <div class="full"><label>Address</label><textarea id="address" rows="2"></textarea></div>
           <div><label>Check In</label><input id="checkIn" type="date" onchange="checkRoomAvailability()"></div>
           <div><label>Check Out</label><input id="checkOut" type="date" onchange="checkRoomAvailability()"></div>
-          <div><label>Room</label><select id="roomNo" onchange="roomChanged()"></select></div>
-          <div><label>Room Type</label><input id="roomType" type="text" readonly></div>
+          <div><label>Room (select)</label><select id="roomNo" onchange="roomChanged()"></select></div>
+          <div><label>Room No.</label><input id="roomType" type="text" readonly></div>
           <div><label>Adults</label><input id="adults" type="number" value="1" min="1"></div>
           <div><label>Children</label><input id="children" type="number" value="0" min="0"></div>
           <div><label>Rate Per Night</label><input id="ratePerNight" type="number" value="0" min="0" oninput="calculateTotal()"></div>
@@ -184,9 +184,67 @@ th { background:#eef4ff; color:var(--royal-blue-dark); }
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwBsUKldfvMFV8mmmUP9ItZOTZowv72-caxtlXQyS_9ngaGelfYwpG1iNXqpH7capyVdw/exec";
 let currentUser = null;
 let rooms = [];
+const ROOM_INVENTORY = {
+  "Double Room": 2,
+  "Double Ensuit": 4,
+  "Room for 3": 2,
+  "Family Room": 1
+};
+const DEFAULT_RATES = {
+  "Double Room": 350,
+  "Double Ensuit": 450,
+  "Room for 3": 700,
+  "Family Room": 1000,
+  "Day Rest": 0
+};
+const ROOM_OPTIONS = [
+  { roomNo: "Double Room", roomType: "Double Room", defaultRate: 350 },
+  { roomNo: "Double Ensuit", roomType: "Double Ensuit", defaultRate: 450 },
+  { roomNo: "Room for 3", roomType: "Room for 3", defaultRate: 700 },
+  { roomNo: "Family Room", roomType: "Family Room", defaultRate: 1000 },
+  { roomNo: "Day Rest", roomType: "Day Rest", defaultRate: 0 }
+];
 
 function money(value) {
   return 'R ' + Number(value || 0).toLocaleString(undefined, { minimumFractionDigits:2, maximumFractionDigits:2 });
+}
+
+function safeRevenue(obj = {}) {
+  return {
+    totalRevenue: Number(obj.totalRevenue || 0),
+    totalBookings: Number(obj.totalBookings || 0),
+    totalBookedValue: Number(obj.totalBookedValue || 0),
+    totalBalance: Number(obj.totalBalance || 0)
+  };
+}
+
+function normalizeRoomName(value) {
+  return String(value || '').trim();
+}
+
+function getInventoryCount(roomType) {
+  return ROOM_INVENTORY[normalizeRoomName(roomType)] || 0;
+}
+
+function countBookedRoomsByType(roomType) {
+  const target = normalizeRoomName(roomType);
+  return (rooms || []).filter(r => normalizeRoomName(r.roomType || r.roomNo) === target).length;
+}
+
+function isRoomTypeFullyBooked(roomType) {
+  const inventory = getInventoryCount(roomType);
+  if (!inventory) return false;
+  return countBookedRoomsByType(roomType) >= inventory;
+}
+
+function availabilityMessage(roomType) {
+  if (isRoomTypeFullyBooked(roomType)) {
+    return '<span class="warning-text">Rooms now fully booked.</span>';
+  }
+  const inventory = getInventoryCount(roomType);
+  if (!inventory) return '';
+  const remaining = inventory - countBookedRoomsByType(roomType);
+  return '<span class="success-text">Rooms available: ' + remaining + ' of ' + inventory + '</span>';
 }
 
 async function api(action, payload = {}) {
@@ -298,47 +356,74 @@ function logout() {
 async function refreshDashboard() {
   try {
     const res = await api('getDashboardData', { role: currentUser ? currentUser.role : 'User' });
-    rooms = res.rooms || [];
+    const bookedRooms = Array.isArray(res.rooms) ? res.rooms : [];
+    rooms = bookedRooms;
     renderRooms();
     populateRoomsDropdown();
-    document.getElementById('dailyRevenue').textContent = money(res.todayRevenue.totalRevenue);
-    document.getElementById('dailyBookingsCount').textContent = res.todayRevenue.totalBookings + ' bookings';
-    document.getElementById('weeklyRevenue').textContent = money(res.weekRevenue.totalRevenue);
-    document.getElementById('weeklyBookingsCount').textContent = res.weekRevenue.totalBookings + ' bookings';
-    document.getElementById('monthlyRevenue').textContent = money(res.monthRevenue.totalRevenue);
-    document.getElementById('monthlyBookingsCount').textContent = res.monthRevenue.totalBookings + ' bookings';
-    document.getElementById('yearlyRevenue').textContent = money(res.yearRevenue.totalRevenue);
-    document.getElementById('yearlyBookingsCount').textContent = res.yearRevenue.totalBookings + ' bookings';
+
+    const todayRevenue = safeRevenue(res.todayRevenue);
+    const weekRevenue = safeRevenue(res.weekRevenue);
+    const monthRevenue = safeRevenue(res.monthRevenue);
+    const yearRevenue = safeRevenue(res.yearRevenue);
+
+    document.getElementById('dailyRevenue').textContent = money(todayRevenue.totalRevenue);
+    document.getElementById('dailyBookingsCount').textContent = todayRevenue.totalBookings + ' bookings';
+    document.getElementById('weeklyRevenue').textContent = money(weekRevenue.totalRevenue);
+    document.getElementById('weeklyBookingsCount').textContent = weekRevenue.totalBookings + ' bookings';
+    document.getElementById('monthlyRevenue').textContent = money(monthRevenue.totalRevenue);
+    document.getElementById('monthlyBookingsCount').textContent = monthRevenue.totalBookings + ' bookings';
+    document.getElementById('yearlyRevenue').textContent = money(yearRevenue.totalRevenue);
+    document.getElementById('yearlyBookingsCount').textContent = yearRevenue.totalBookings + ' bookings';
   } catch (error) {
     document.getElementById('bookingMessage').innerHTML = '<span class="danger-text">' + error.message + '</span>';
   }
 }
 
+
 function renderRooms() {
   const wrap = document.getElementById('roomsList');
-  if (!rooms.length) {
-    wrap.textContent = 'No rooms found.';
-    return;
-  }
-  wrap.innerHTML = rooms.map(r => '<span class="room-chip">Room ' + r.roomNo + ' - ' + r.roomType + ' (' + money(r.defaultRate) + ')</span>').join('');
+  const summary = ROOM_OPTIONS.map(option => {
+    const roomType = option.roomType;
+    const inventory = getInventoryCount(roomType);
+    if (!inventory) {
+      return '<span class="room-chip">' + roomType + ' (' + money(option.defaultRate) + ')</span>';
+    }
+    const booked = countBookedRoomsByType(roomType);
+    const remaining = Math.max(inventory - booked, 0);
+    const status = remaining === 0 ? ' - Fully booked' : ' - ' + remaining + ' available';
+    return '<span class="room-chip">' + roomType + ' (' + inventory + ' total, ' + booked + ' booked' + status + ', ' + money(option.defaultRate) + ')</span>';
+  });
+  wrap.innerHTML = summary.join('');
 }
+
 
 function populateRoomsDropdown() {
   const sel = document.getElementById('roomNo');
-  sel.innerHTML = '<option value="">Select room</option>' + rooms.map(r =>
-    '<option value="' + r.roomNo + '" data-type="' + r.roomType + '" data-rate="' + r.defaultRate + '">' + r.roomNo + ' - ' + r.roomType + '</option>'
-  ).join('');
+  sel.innerHTML = '<option value="">Select room</option>' + ROOM_OPTIONS.map(r => {
+    const full = isRoomTypeFullyBooked(r.roomType);
+    const note = full ? ' (Fully booked)' : '';
+    return '<option value="' + r.roomNo + '" data-type="' + r.roomType + '" data-rate="' + r.defaultRate + '" ' + (full ? 'disabled' : '') + '>' + r.roomNo + note + '</option>';
+  }).join('');
 }
+
 
 function roomChanged() {
   const sel = document.getElementById('roomNo');
   const opt = sel.options[sel.selectedIndex];
-  if (!opt || !opt.value) return;
-  document.getElementById('roomType').value = opt.getAttribute('data-type') || '';
-  document.getElementById('ratePerNight').value = opt.getAttribute('data-rate') || 0;
+  const msg = document.getElementById('roomStatusMessage');
+  if (!opt || !opt.value) {
+    document.getElementById('roomType').value = '';
+    msg.textContent = '';
+    return;
+  }
+  const roomType = opt.getAttribute('data-type') || '';
+  document.getElementById('roomType').value = opt.value || roomType;
+  document.getElementById('ratePerNight').value = DEFAULT_RATES[roomType] ?? Number(opt.getAttribute('data-rate') || 0);
   calculateTotal();
+  msg.innerHTML = availabilityMessage(roomType);
   checkRoomAvailability();
 }
+
 
 function calculateTotal() {
   const checkIn = document.getElementById('checkIn').value;
@@ -360,17 +445,32 @@ async function checkRoomAvailability() {
   const checkIn = document.getElementById('checkIn').value;
   const checkOut = document.getElementById('checkOut').value;
   const msg = document.getElementById('roomStatusMessage');
-  if (!roomNo || !checkIn || !checkOut) {
+  if (!roomNo) {
     msg.textContent = '';
+    return;
+  }
+
+  if (roomNo !== 'Day Rest' && isRoomTypeFullyBooked(roomNo)) {
+    msg.innerHTML = '<span class="warning-text">Rooms now fully booked.</span>';
+    return;
+  }
+
+  if (!checkIn || !checkOut) {
+    msg.innerHTML = availabilityMessage(roomNo);
     return;
   }
   try {
     const res = await api('roomIsTaken', { roomNo, checkIn, checkOut });
-    msg.innerHTML = res.taken ? '<span class="danger-text">Room already taken</span>' : '<span class="success-text">Room available</span>';
+    if (res.taken) {
+      msg.innerHTML = '<span class="danger-text">Room already taken</span>';
+      return;
+    }
+    msg.innerHTML = availabilityMessage(roomNo);
   } catch (error) {
     msg.innerHTML = '<span class="danger-text">' + error.message + '</span>';
   }
 }
+
 
 async function searchGuest() {
   const q = document.getElementById('guestSearch').value.trim();
@@ -425,6 +525,10 @@ async function saveBooking() {
     }
   };
   const msg = document.getElementById('bookingMessage');
+  if (payload.roomNo !== 'Day Rest' && isRoomTypeFullyBooked(payload.roomNo)) {
+    msg.innerHTML = '<span class="warning-text">Rooms now fully booked.</span>';
+    return;
+  }
   msg.textContent = 'Saving booking...';
   try {
     const res = await api('saveBooking', payload);
@@ -488,7 +592,7 @@ async function loadRevenueReport() {
   const period = document.getElementById('reportPeriod').value;
   try {
     const res = await api('getRevenueReport', { period });
-    const summary = res.summary;
+    const summary = safeRevenue(res.summary);
     document.getElementById('reportSummary').innerHTML =
       '<span class="success-text">' + period.toUpperCase() + ' Revenue:</span> ' +
       money(summary.totalRevenue) + ' | Bookings: ' + summary.totalBookings +
