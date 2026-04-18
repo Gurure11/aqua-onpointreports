@@ -1,640 +1,552 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <base target="_top">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Arcon Park Guest House (Guests Booking)</title>
-  <style>
-    :root {
-      --royal-blue: #1f4fbf;
-      --royal-blue-dark: #163a8f;
-      --lime-green: #9acd32;
-      --lime-green-dark: #76a61f;
-      --bg: #f4f7fc;
-      --card: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --danger: #dc2626;
-      --success: #15803d;
-      --warning: #d97706;
-      --border: #dbe4f0;
-    }
-
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--text); }
-    .app-header { background: linear-gradient(135deg, var(--royal-blue), var(--royal-blue-dark)); color: white; padding: 18px; position: sticky; top: 0; z-index: 10; }
-    .header-row { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
-    .brand-title { margin: 0; font-size: 24px; font-weight: 700; }
-    .brand-sub { margin: 4px 0 0; font-size: 13px; opacity: 0.9; }
-    .connection-pill { padding: 10px 14px; border-radius: 999px; font-size: 13px; font-weight: 700; background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25); }
-    .connected { color: #d9ffd9; }
-    .disconnected { color: #ffd9d9; }
-
-    .container { max-width: 1300px; margin: 0 auto; padding: 18px; }
-    .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; box-shadow: 0 8px 24px rgba(15,23,42,.05); }
-
-    .col-3 { grid-column: span 3; }
-    .col-4 { grid-column: span 4; }
-    .col-8 { grid-column: span 8; }
-    .col-12 { grid-column: span 12; }
-
-    .auth-wrap { max-width: 980px; margin: 40px auto; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .auth-card h2 { margin-top: 0; color: var(--royal-blue-dark); }
-    .auth-card p { color: var(--muted); }
-
-    label { display: block; font-weight: 700; margin-bottom: 6px; font-size: 14px; }
-    input, select, textarea, button {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      font-size: 14px;
-    }
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: var(--royal-blue);
-      box-shadow: 0 0 0 3px rgba(31,79,191,.15);
-    }
-
-    .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
-    .form-grid .full { grid-column: span 2; }
-
-    button { cursor: pointer; font-weight: 700; border: none; }
-    .btn-primary { background: var(--royal-blue); color: white; }
-    .btn-primary:hover { background: var(--royal-blue-dark); }
-    .btn-accent { background: var(--lime-green); color: #102400; }
-    .btn-accent:hover { background: var(--lime-green-dark); color: white; }
-    .btn-outline { background: white; color: var(--royal-blue); border: 1px solid var(--royal-blue); }
-
-    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
-    .btn-row button, .btn-row input { flex: 1; min-width: 160px; }
-
-    .info { font-size: 13px; color: var(--muted); margin-top: 8px; line-height: 1.4; }
-    .success-text { color: var(--success); font-weight: 700; }
-    .danger-text { color: var(--danger); font-weight: 700; }
-    .warning-text { color: var(--warning); font-weight: 700; }
-
-    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
-    .toolbar button, .toolbar select { width: auto; }
-
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; }
-    th, td { text-align: left; padding: 10px; border-bottom: 1px solid #edf2f7; font-size: 13px; }
-    th { background: #eef4ff; color: var(--royal-blue-dark); }
-
-    .badge { display: inline-block; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
-    .badge-admin { background: #dbeafe; color: #1d4ed8; }
-    .badge-user { background: #ecfccb; color: #4d7c0f; }
-
-    .room-chip { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px; background: #eef4ff; border: 1px solid #dbe7ff; margin: 4px; font-size: 13px; font-weight: 700; }
-
-    .hero-list {
-      margin: 14px 0 0;
-      padding-left: 18px;
-      color: var(--muted);
-      line-height: 1.5;
-      font-size: 14px;
-    }
-
-    .hidden { display: none !important; }
-
-    @media (max-width: 900px) {
-      .auth-wrap { grid-template-columns: 1fr; }
-      .col-3, .col-4, .col-8, .col-12 { grid-column: span 12; }
-      .form-grid { grid-template-columns: 1fr; }
-      .form-grid .full { grid-column: span 1; }
-    }
-
-    @media print {
-      body * { visibility: hidden; }
-      #invoicePrintArea, #invoicePrintArea * { visibility: visible; }
-      #invoicePrintArea {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        background: white;
-        padding: 24px;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arcon Park Guest House (Guests Booking)</title>
+<style>
+:root {
+  --royal-blue:#1f4fbf; --royal-blue-dark:#163a8f; --lime-green:#9acd32; --lime-green-dark:#76a61f;
+  --bg:#f4f7fc; --card:#ffffff; --text:#1f2937; --muted:#6b7280; --danger:#dc2626; --success:#15803d;
+  --warning:#d97706; --border:#dbe4f0; --shadow:0 10px 24px rgba(15,23,42,.06);
+}
+* { box-sizing:border-box; }
+body { margin:0; font-family:Arial,sans-serif; background:var(--bg); color:var(--text); }
+.app-header { background:linear-gradient(135deg,var(--royal-blue),var(--royal-blue-dark)); color:white; padding:18px; position:sticky; top:0; z-index:10; }
+.header-row { display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+.brand-title { margin:0; font-size:24px; font-weight:700; }
+.brand-sub { margin:4px 0 0; font-size:13px; opacity:.92; }
+.connection-pill { padding:10px 14px; border-radius:999px; font-size:13px; font-weight:700; background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.25); }
+.container { max-width:1320px; margin:0 auto; padding:18px; }
+.grid { display:grid; grid-template-columns:repeat(12,1fr); gap:16px; }
+.card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:18px; box-shadow:var(--shadow); }
+.col-3 { grid-column:span 3; } .col-4 { grid-column:span 4; } .col-8 { grid-column:span 8; } .col-12 { grid-column:span 12; }
+.auth-wrap { max-width:980px; margin:40px auto; display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+h1,h2,h3 { margin-top:0; } h2,h3 { color:var(--royal-blue-dark); }
+label { display:block; font-weight:700; margin-bottom:6px; font-size:14px; }
+input,select,textarea,button { width:100%; padding:12px 14px; border-radius:10px; border:1px solid var(--border); font-size:14px; }
+input:focus,select:focus,textarea:focus { outline:none; border-color:var(--royal-blue); box-shadow:0 0 0 3px rgba(31,79,191,.15); }
+button { cursor:pointer; font-weight:700; border:none; }
+.btn-primary { background:var(--royal-blue); color:white; } .btn-primary:hover { background:var(--royal-blue-dark); }
+.btn-accent { background:var(--lime-green); color:#102400; } .btn-accent:hover { background:var(--lime-green-dark); color:white; }
+.btn-outline { background:white; color:var(--royal-blue); border:1px solid var(--royal-blue); }
+.btn-row { display:flex; gap:10px; flex-wrap:wrap; } .btn-row button,.btn-row input { flex:1; min-width:160px; }
+.form-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; } .form-grid .full { grid-column:span 2; }
+.info { font-size:13px; color:var(--muted); margin-top:8px; line-height:1.45; }
+.success-text { color:var(--success); font-weight:700; } .danger-text { color:var(--danger); font-weight:700; } .warning-text { color:var(--warning); font-weight:700; }
+.badge { display:inline-block; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:700; }
+.badge-admin { background:#dbeafe; color:#1d4ed8; } .badge-user { background:#ecfccb; color:#4d7c0f; }
+.room-chip { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:#eef4ff; border:1px solid #dbe7ff; margin:4px; font-size:13px; font-weight:700; }
+.metric { font-size:28px; font-weight:800; color:var(--royal-blue); }
+table { width:100%; border-collapse:collapse; margin-top:10px; background:white; }
+th,td { text-align:left; padding:10px; border-bottom:1px solid #edf2f7; font-size:13px; vertical-align:top; }
+th { background:#eef4ff; color:var(--royal-blue-dark); }
+.table-wrap { max-height:420px; overflow:auto; border-radius:12px; border:1px solid var(--border); }
+.hidden { display:none !important; }
+@media (max-width:900px) {
+  .auth-wrap { grid-template-columns:1fr; }
+  .col-3,.col-4,.col-8,.col-12 { grid-column:span 12; }
+  .form-grid { grid-template-columns:1fr; } .form-grid .full { grid-column:span 1; }
+}
+@media print {
+  body * { visibility:hidden; }
+  #invoicePrintArea, #invoicePrintArea * { visibility:visible; }
+  #invoicePrintArea { position:absolute; left:0; top:0; width:100%; background:white; padding:24px; }
+}
+</style>
 </head>
 <body>
-  <div class="app-header">
-    <div class="header-row">
-      <div>
-        <h1 class="brand-title">Arcon Park Guest House (Guests Booking)</h1>
-        <p class="brand-sub">Reception booking, room allocation, invoices and reports</p>
+<div class="app-header">
+  <div class="header-row">
+    <div>
+      <h1 class="brand-title">Arcon Park Guest House (Guests Booking)</h1>
+      <p class="brand-sub">Standalone HTML connected to Google Sheets via Apps Script API</p>
+    </div>
+    <div id="connectionStatus" class="connection-pill">Checking connection...</div>
+  </div>
+</div>
+
+<div class="container">
+  <div id="loginView" class="auth-wrap">
+    <div class="card">
+      <h2>Login</h2>
+      <p class="info">This page connects through your Apps Script web app URL.</p>
+      <div style="margin-bottom:12px;"><label>Username</label><input id="loginUsername" type="text" placeholder="Enter username"></div>
+      <div style="margin-bottom:12px;"><label>Password</label><input id="loginPassword" type="password" placeholder="Enter password"></div>
+      <button class="btn-primary" onclick="login()">Login</button>
+      <div id="loginMessage" class="info"></div>
+    </div>
+
+    <div class="card">
+      <h2>Create New User</h2>
+      <div class="form-grid">
+        <div><label>Full Name</label><input id="regFullName" type="text" placeholder="Enter full name"></div>
+        <div><label>Username</label><input id="regUsername" type="text" placeholder="Choose username"></div>
+        <div><label>Password</label><input id="regPassword" type="password" placeholder="Choose password"></div>
+        <div><label>Role</label><select id="regRole"><option value="User">User</option><option value="Admin">Admin</option></select></div>
       </div>
-      <div id="connectionStatus" class="connection-pill">Checking connection...</div>
+      <div class="btn-row" style="margin-top:16px;">
+        <button class="btn-accent" onclick="registerUser()">Register User</button>
+        <button class="btn-outline" onclick="clearRegistrationForm()">Clear</button>
+      </div>
+      <div id="registerMessage" class="info"></div>
+      <div class="info">Default login after setup: <strong>admin / admin123</strong></div>
     </div>
   </div>
 
-  <div class="container">
-    <div id="loginView" class="auth-wrap">
-      <div class="card auth-card">
-        <h2>Login</h2>
-        <p>Sign in to manage bookings, allocate rooms, print invoices and view reports.</p>
-        <div style="margin-bottom:12px;">
-          <label>Username</label>
-          <input id="loginUsername" type="text" placeholder="Enter username">
+  <div id="appView" class="hidden">
+    <div class="grid">
+      <div class="col-12 card">
+        <div class="header-row">
+          <div>
+            <h2 style="margin-bottom:6px;">Welcome, <span id="currentUserName"></span></h2>
+            <div><span id="currentUserRoleBadge" class="badge"></span></div>
+          </div>
+          <div class="btn-row" style="max-width:520px; width:100%;">
+            <button class="btn-outline" onclick="refreshDashboard()">Refresh</button>
+            <button class="btn-outline" onclick="setupSheets()">Setup Sheets</button>
+            <button class="btn-accent" onclick="logout()">Logout</button>
+          </div>
         </div>
-        <div style="margin-bottom:12px;">
-          <label>Password</label>
-          <input id="loginPassword" type="password" placeholder="Enter password">
-        </div>
-        <button class="btn-primary" onclick="login()">Login</button>
-        <div id="loginMessage" class="info"></div>
-
-        <ul class="hero-list">
-          <li>Room availability check before saving a booking</li>
-          <li>Repeat guest search using passport/ID, name or phone</li>
-          <li>Admin reports for daily, weekly, monthly and yearly revenue</li>
-        </ul>
       </div>
 
-      <div class="card auth-card">
-        <h2>Create New User</h2>
-        <p>Register a new reception or admin account. This saves to the Login sheet.</p>
+      <div class="col-3 card"><h3>Daily Revenue</h3><div class="metric" id="dailyRevenue">R 0.00</div><div class="info" id="dailyBookingsCount">0 bookings</div></div>
+      <div class="col-3 card"><h3>Weekly Revenue</h3><div class="metric" id="weeklyRevenue">R 0.00</div><div class="info" id="weeklyBookingsCount">0 bookings</div></div>
+      <div class="col-3 card"><h3>Monthly Revenue</h3><div class="metric" id="monthlyRevenue">R 0.00</div><div class="info" id="monthlyBookingsCount">0 bookings</div></div>
+      <div class="col-3 card"><h3>Yearly Revenue</h3><div class="metric" id="yearlyRevenue">R 0.00</div><div class="info" id="yearlyBookingsCount">0 bookings</div></div>
 
+      <div class="col-8 card">
+        <h2>Guest Booking Form</h2>
         <div class="form-grid">
-          <div>
-            <label>Full Name</label>
-            <input id="regFullName" type="text" placeholder="Enter full name">
+          <div class="full">
+            <label>Search Existing Guest</label>
+            <div class="btn-row">
+              <input id="guestSearch" type="text" placeholder="Passport/ID, phone or name">
+              <button class="btn-outline" onclick="searchGuest()">Find Guest</button>
+            </div>
+            <div id="guestSearchMessage" class="info"></div>
           </div>
-          <div>
-            <label>Username</label>
-            <input id="regUsername" type="text" placeholder="Choose username">
-          </div>
-          <div>
-            <label>Password</label>
-            <input id="regPassword" type="password" placeholder="Choose password">
-          </div>
-          <div>
-            <label>Role</label>
-            <select id="regRole">
-              <option value="User">User</option>
-              <option value="Admin">Admin</option>
-            </select>
-          </div>
+          <div><label>First Name</label><input id="firstName" type="text"></div>
+          <div><label>Last Name</label><input id="lastName" type="text"></div>
+          <div><label>Passport / ID</label><input id="passportOrId" type="text"></div>
+          <div><label>Phone</label><input id="phone" type="text"></div>
+          <div><label>Email</label><input id="email" type="email"></div>
+          <div><label>Nationality</label><input id="nationality" type="text"></div>
+          <div class="full"><label>Address</label><textarea id="address" rows="2"></textarea></div>
+          <div><label>Check In</label><input id="checkIn" type="date" onchange="checkRoomAvailability()"></div>
+          <div><label>Check Out</label><input id="checkOut" type="date" onchange="checkRoomAvailability()"></div>
+          <div><label>Room</label><select id="roomNo" onchange="roomChanged()"></select></div>
+          <div><label>Room Type</label><input id="roomType" type="text" readonly></div>
+          <div><label>Adults</label><input id="adults" type="number" value="1" min="1"></div>
+          <div><label>Children</label><input id="children" type="number" value="0" min="0"></div>
+          <div><label>Rate Per Night</label><input id="ratePerNight" type="number" value="0" min="0" oninput="calculateTotal()"></div>
+          <div><label>Total Amount</label><input id="totalAmount" type="number" value="0" min="0"></div>
+          <div><label>Amount Paid</label><input id="amountPaid" type="number" value="0" min="0"></div>
+          <div><label>Payment Method</label><select id="paymentMethod"><option>Cash</option><option>Bank Transfer</option><option>Card</option><option>Mobile Money</option></select></div>
+          <div class="full"><label>Booking Notes</label><textarea id="notes" rows="2"></textarea></div>
         </div>
-
+        <div class="info" id="roomStatusMessage"></div>
         <div class="btn-row" style="margin-top:16px;">
-          <button class="btn-accent" onclick="registerUser()">Register User</button>
-          <button class="btn-outline" onclick="clearRegistrationForm()">Clear</button>
+          <button class="btn-primary" onclick="saveBooking()">Save Booking</button>
+          <button class="btn-outline" onclick="clearForm()">Clear Form</button>
         </div>
-        <div id="registerMessage" class="info"></div>
+        <div id="bookingMessage" class="info"></div>
+      </div>
+
+      <div class="col-4 card">
+        <h2>Rooms</h2>
+        <div id="roomsList">Loading rooms...</div>
+      </div>
+
+      <div id="adminReportsSection" class="col-12 card hidden">
+        <h2>Admin Reports</h2>
+        <div class="btn-row" style="margin-bottom:12px;">
+          <select id="reportPeriod">
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+            <option value="yearly">Yearly</option>
+          </select>
+          <button class="btn-primary" onclick="loadRevenueReport()">Load Revenue Report</button>
+          <button class="btn-accent" onclick="loadRoomReport()">Load Room Report</button>
+          <button class="btn-outline" onclick="downloadTableCsv('reportTable', 'report-export.csv')">Download Report</button>
+        </div>
+        <div id="reportSummary" class="info"></div>
+        <div class="table-wrap"><table id="reportTable"></table></div>
       </div>
     </div>
-
-    <div id="appView" class="hidden">
-      <div class="grid">
-        <div class="col-12 card">
-          <div class="header-row">
-            <div>
-              <h2 style="margin-bottom:6px;">Welcome, <span id="currentUserName"></span></h2>
-              <div><span id="currentUserRoleBadge" class="badge"></span></div>
-            </div>
-            <div class="btn-row" style="max-width:420px; width:100%;">
-              <button class="btn-outline" onclick="refreshDashboard()">Refresh</button>
-              <button class="btn-accent" onclick="logout()">Logout</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-3 card"><h3>Daily Revenue</h3><div id="dailyRevenue"></div><div class="info" id="dailyBookingsCount"></div></div>
-        <div class="col-3 card"><h3>Weekly Revenue</h3><div id="weeklyRevenue"></div><div class="info" id="weeklyBookingsCount"></div></div>
-        <div class="col-3 card"><h3>Monthly Revenue</h3><div id="monthlyRevenue"></div><div class="info" id="monthlyBookingsCount"></div></div>
-        <div class="col-3 card"><h3>Yearly Revenue</h3><div id="yearlyRevenue"></div><div class="info" id="yearlyBookingsCount"></div></div>
-
-        <div class="col-8 card">
-          <h2>Guest Booking Form</h2>
-          <div class="form-grid">
-            <div class="full">
-              <label>Search Existing Guest</label>
-              <div class="btn-row">
-                <input id="guestSearch" type="text" placeholder="Passport/ID, phone or name">
-                <button class="btn-outline" onclick="searchGuest()">Find Guest</button>
-              </div>
-              <div id="guestSearchMessage" class="info"></div>
-            </div>
-            <div><label>First Name</label><input id="firstName" type="text"></div>
-            <div><label>Last Name</label><input id="lastName" type="text"></div>
-            <div><label>Passport / ID</label><input id="passportOrId" type="text"></div>
-            <div><label>Phone</label><input id="phone" type="text"></div>
-            <div><label>Email</label><input id="email" type="email"></div>
-            <div><label>Nationality</label><input id="nationality" type="text"></div>
-            <div class="full"><label>Address</label><textarea id="address" rows="2"></textarea></div>
-            <div><label>Check In</label><input id="checkIn" type="date" onchange="checkRoomAvailability()"></div>
-            <div><label>Check Out</label><input id="checkOut" type="date" onchange="checkRoomAvailability()"></div>
-            <div><label>Room</label><select id="roomNo" onchange="roomChanged()"></select></div>
-            <div><label>Room Type</label><input id="roomType" type="text" readonly></div>
-            <div><label>Adults</label><input id="adults" type="number" value="1" min="1"></div>
-            <div><label>Children</label><input id="children" type="number" value="0" min="0"></div>
-            <div><label>Rate Per Night</label><input id="ratePerNight" type="number" value="0" min="0" oninput="calculateTotal()"></div>
-            <div><label>Total Amount</label><input id="totalAmount" type="number" value="0" min="0"></div>
-            <div><label>Amount Paid</label><input id="amountPaid" type="number" value="0" min="0"></div>
-            <div><label>Payment Method</label><select id="paymentMethod"><option>Cash</option><option>Bank Transfer</option><option>Card</option><option>Mobile Money</option></select></div>
-            <div class="full"><label>Booking Notes</label><textarea id="notes" rows="2"></textarea></div>
-          </div>
-          <div class="info" id="roomStatusMessage"></div>
-          <div class="btn-row" style="margin-top:16px;">
-            <button class="btn-primary" onclick="saveBooking()">Save Booking</button>
-            <button class="btn-outline" onclick="clearForm()">Clear Form</button>
-          </div>
-          <div id="bookingMessage" class="info"></div>
-        </div>
-
-        <div class="col-4 card"><h2>Rooms</h2><div id="roomsList">Loading rooms...</div></div>
-
-        <div id="adminReportsSection" class="col-12 card hidden">
-          <h2>Admin Reports</h2>
-          <div class="toolbar">
-            <select id="reportPeriod"><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option><option value="yearly">Yearly</option></select>
-            <button class="btn-primary" onclick="loadRevenueReport()">Load Revenue Report</button>
-            <button class="btn-accent" onclick="loadRoomReport()">Load Room Report</button>
-            <button class="btn-outline" onclick="downloadTableCsv('reportTable', 'report-export.csv')">Download Report</button>
-          </div>
-          <div id="reportSummary" class="info"></div>
-          <div style="overflow:auto;"><table id="reportTable"></table></div>
-        </div>
-      </div>
-    </div>
-
-    <div id="invoicePrintArea" class="hidden"></div>
   </div>
 
-  <script>
-    let currentUser = null;
-    let rooms = [];
+  <div id="invoicePrintArea" class="hidden"></div>
+</div>
 
-    function money(value) {
-      return 'R ' + Number(value || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyFZhBP3VBjlUDwT5nsDYNLIMb9aXOTkZWg4wrYFJUccEGHthvSiDi0Svsb6Fpw6ipbUg/exec";
+let currentUser = null;
+let rooms = [];
+
+function money(value) {
+  return 'R ' + Number(value || 0).toLocaleString(undefined, { minimumFractionDigits:2, maximumFractionDigits:2 });
+}
+
+async function api(action, payload = {}) {
+  const response = await fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action, ...payload })
+  });
+  const text = await response.text();
+  try { return JSON.parse(text); }
+  catch (error) { throw new Error('Invalid API response: ' + text.slice(0, 200)); }
+}
+
+function setConnectionStatus(connected, message) {
+  const el = document.getElementById('connectionStatus');
+  el.textContent = message || (connected ? 'Connected' : 'Not connected');
+}
+
+async function checkConnection() {
+  try {
+    const res = await api('ping');
+    const okTabs = res.connected && res.loginTabFound && res.guestsTabFound && res.bookingsTabFound && res.roomsTabFound;
+    setConnectionStatus(okTabs, okTabs ? 'Connected to Google Sheet' : (res.message || 'Connected, but one or more tabs are missing'));
+  } catch (error) {
+    setConnectionStatus(false, error.message || 'Connection failed');
+  }
+}
+
+async function setupSheets() {
+  try {
+    const res = await api('setupSheets');
+    alert(res.message || 'Setup complete');
+    await checkConnection();
+    if (currentUser) await refreshDashboard();
+  } catch (error) {
+    alert(error.message || 'Setup failed');
+  }
+}
+
+async function login() {
+  const username = document.getElementById('loginUsername').value.trim();
+  const password = document.getElementById('loginPassword').value.trim();
+  const msg = document.getElementById('loginMessage');
+  if (!username || !password) {
+    msg.innerHTML = '<span class="warning-text">Enter username and password.</span>';
+    return;
+  }
+  msg.textContent = 'Signing in...';
+  try {
+    const res = await api('login', { username, password });
+    if (!res.success) {
+      msg.innerHTML = '<span class="danger-text">' + (res.message || 'Login failed.') + '</span>';
+      return;
     }
+    currentUser = res.user;
+    document.getElementById('currentUserName').textContent = currentUser.fullName || currentUser.username;
+    const badge = document.getElementById('currentUserRoleBadge');
+    badge.textContent = currentUser.role;
+    badge.className = 'badge ' + (currentUser.role === 'Admin' ? 'badge-admin' : 'badge-user');
+    document.getElementById('loginView').classList.add('hidden');
+    document.getElementById('appView').classList.remove('hidden');
+    document.getElementById('adminReportsSection').classList.toggle('hidden', currentUser.role !== 'Admin');
+    msg.textContent = '';
+    await refreshDashboard();
+  } catch (error) {
+    msg.innerHTML = '<span class="danger-text">' + error.message + '</span>';
+  }
+}
 
-    function setConnectionStatus(connected, message) {
-      const el = document.getElementById('connectionStatus');
-      el.classList.remove('connected', 'disconnected');
-      if (connected) {
-        el.classList.add('connected');
-        el.textContent = 'Connected to Google Sheet';
-      } else {
-        el.classList.add('disconnected');
-        el.textContent = message || 'Not connected';
-      }
+async function registerUser() {
+  const fullName = document.getElementById('regFullName').value.trim();
+  const username = document.getElementById('regUsername').value.trim();
+  const password = document.getElementById('regPassword').value.trim();
+  const role = document.getElementById('regRole').value;
+  const msg = document.getElementById('registerMessage');
+  if (!fullName || !username || !password) {
+    msg.innerHTML = '<span class="warning-text">Complete full name, username and password.</span>';
+    return;
+  }
+  msg.textContent = 'Creating user...';
+  try {
+    const res = await api('register', { fullName, username, password, role });
+    if (!res.success) {
+      msg.innerHTML = '<span class="danger-text">' + (res.message || 'Could not create user.') + '</span>';
+      return;
     }
+    msg.innerHTML = '<span class="success-text">User created successfully.</span>';
+    clearRegistrationForm();
+  } catch (error) {
+    msg.innerHTML = '<span class="danger-text">' + error.message + '</span>';
+  }
+}
 
-    function safeMessage(targetId, html) {
-      const el = document.getElementById(targetId);
-      if (el) el.innerHTML = html;
+function clearRegistrationForm() {
+  document.getElementById('regFullName').value = '';
+  document.getElementById('regUsername').value = '';
+  document.getElementById('regPassword').value = '';
+  document.getElementById('regRole').value = 'User';
+}
+
+function logout() {
+  currentUser = null;
+  document.getElementById('appView').classList.add('hidden');
+  document.getElementById('loginView').classList.remove('hidden');
+  document.getElementById('loginUsername').value = '';
+  document.getElementById('loginPassword').value = '';
+  document.getElementById('loginMessage').textContent = '';
+}
+
+async function refreshDashboard() {
+  try {
+    const res = await api('getDashboardData', { role: currentUser ? currentUser.role : 'User' });
+    rooms = res.rooms || [];
+    renderRooms();
+    populateRoomsDropdown();
+    document.getElementById('dailyRevenue').textContent = money(res.todayRevenue.totalRevenue);
+    document.getElementById('dailyBookingsCount').textContent = res.todayRevenue.totalBookings + ' bookings';
+    document.getElementById('weeklyRevenue').textContent = money(res.weekRevenue.totalRevenue);
+    document.getElementById('weeklyBookingsCount').textContent = res.weekRevenue.totalBookings + ' bookings';
+    document.getElementById('monthlyRevenue').textContent = money(res.monthRevenue.totalRevenue);
+    document.getElementById('monthlyBookingsCount').textContent = res.monthRevenue.totalBookings + ' bookings';
+    document.getElementById('yearlyRevenue').textContent = money(res.yearRevenue.totalRevenue);
+    document.getElementById('yearlyBookingsCount').textContent = res.yearRevenue.totalBookings + ' bookings';
+  } catch (error) {
+    document.getElementById('bookingMessage').innerHTML = '<span class="danger-text">' + error.message + '</span>';
+  }
+}
+
+function renderRooms() {
+  const wrap = document.getElementById('roomsList');
+  if (!rooms.length) {
+    wrap.textContent = 'No rooms found.';
+    return;
+  }
+  wrap.innerHTML = rooms.map(r => '<span class="room-chip">Room ' + r.roomNo + ' - ' + r.roomType + ' (' + money(r.defaultRate) + ')</span>').join('');
+}
+
+function populateRoomsDropdown() {
+  const sel = document.getElementById('roomNo');
+  sel.innerHTML = '<option value="">Select room</option>' + rooms.map(r =>
+    '<option value="' + r.roomNo + '" data-type="' + r.roomType + '" data-rate="' + r.defaultRate + '">' + r.roomNo + ' - ' + r.roomType + '</option>'
+  ).join('');
+}
+
+function roomChanged() {
+  const sel = document.getElementById('roomNo');
+  const opt = sel.options[sel.selectedIndex];
+  if (!opt || !opt.value) return;
+  document.getElementById('roomType').value = opt.getAttribute('data-type') || '';
+  document.getElementById('ratePerNight').value = opt.getAttribute('data-rate') || 0;
+  calculateTotal();
+  checkRoomAvailability();
+}
+
+function calculateTotal() {
+  const checkIn = document.getElementById('checkIn').value;
+  const checkOut = document.getElementById('checkOut').value;
+  const rate = Number(document.getElementById('ratePerNight').value || 0);
+  if (!checkIn || !checkOut) {
+    document.getElementById('totalAmount').value = rate;
+    return;
+  }
+  const a = new Date(checkIn);
+  const b = new Date(checkOut);
+  let nights = Math.round((b - a) / (1000 * 60 * 60 * 24));
+  if (nights <= 0) nights = 1;
+  document.getElementById('totalAmount').value = nights * rate;
+}
+
+async function checkRoomAvailability() {
+  const roomNo = document.getElementById('roomNo').value;
+  const checkIn = document.getElementById('checkIn').value;
+  const checkOut = document.getElementById('checkOut').value;
+  const msg = document.getElementById('roomStatusMessage');
+  if (!roomNo || !checkIn || !checkOut) {
+    msg.textContent = '';
+    return;
+  }
+  try {
+    const res = await api('roomIsTaken', { roomNo, checkIn, checkOut });
+    msg.innerHTML = res.taken ? '<span class="danger-text">Room already taken</span>' : '<span class="success-text">Room available</span>';
+  } catch (error) {
+    msg.innerHTML = '<span class="danger-text">' + error.message + '</span>';
+  }
+}
+
+async function searchGuest() {
+  const q = document.getElementById('guestSearch').value.trim();
+  const msg = document.getElementById('guestSearchMessage');
+  if (!q) {
+    msg.innerHTML = '<span class="warning-text">Enter a passport/ID, phone or name.</span>';
+    return;
+  }
+  try {
+    const res = await api('findGuest', { searchValue:q });
+    if (!res.guest) {
+      msg.innerHTML = '<span class="warning-text">No previous guest found.</span>';
+      return;
     }
+    const g = res.guest;
+    document.getElementById('firstName').value = g['First Name'] || '';
+    document.getElementById('lastName').value = g['Last Name'] || '';
+    document.getElementById('passportOrId').value = g['Passport Or ID'] || '';
+    document.getElementById('phone').value = g['Phone'] || '';
+    document.getElementById('email').value = g['Email'] || '';
+    document.getElementById('address').value = g['Address'] || '';
+    document.getElementById('nationality').value = g['Nationality'] || '';
+    msg.innerHTML = '<span class="success-text">Guest details loaded.</span>';
+  } catch (error) {
+    msg.innerHTML = '<span class="danger-text">' + error.message + '</span>';
+  }
+}
 
-    function checkConnection() {
-      google.script.run.withSuccessHandler(function(res) {
-        setConnectionStatus(!!res.connected, res.message);
-      }).withFailureHandler(function(err) {
-        setConnectionStatus(false, err && err.message ? err.message : 'Connection failed');
-      }).pingConnection();
+async function saveBooking() {
+  if (!currentUser) return;
+  const payload = {
+    roomNo: document.getElementById('roomNo').value,
+    roomType: document.getElementById('roomType').value,
+    checkIn: document.getElementById('checkIn').value,
+    checkOut: document.getElementById('checkOut').value,
+    adults: document.getElementById('adults').value,
+    children: document.getElementById('children').value,
+    ratePerNight: document.getElementById('ratePerNight').value,
+    totalAmount: document.getElementById('totalAmount').value,
+    amountPaid: document.getElementById('amountPaid').value,
+    paymentMethod: document.getElementById('paymentMethod').value,
+    bookedBy: currentUser.fullName || currentUser.username,
+    guest: {
+      firstName: document.getElementById('firstName').value,
+      lastName: document.getElementById('lastName').value,
+      passportOrId: document.getElementById('passportOrId').value,
+      phone: document.getElementById('phone').value,
+      email: document.getElementById('email').value,
+      address: document.getElementById('address').value,
+      nationality: document.getElementById('nationality').value,
+      notes: document.getElementById('notes').value
     }
-
-    function login() {
-      const username = document.getElementById('loginUsername').value.trim();
-      const password = document.getElementById('loginPassword').value.trim();
-      const msg = document.getElementById('loginMessage');
-
-      if (!username || !password) {
-        msg.innerHTML = '<span class="warning-text">Enter username and password.</span>';
-        return;
-      }
-
-      msg.textContent = 'Signing in...';
-
-      google.script.run.withSuccessHandler(function(res) {
-        if (!res || !res.success) {
-          msg.innerHTML = '<span class="danger-text">' + (res && res.message ? res.message : 'Login failed.') + '</span>';
-          return;
-        }
-
-        currentUser = res.user;
-        document.getElementById('currentUserName').textContent = currentUser.fullName || currentUser.username;
-        const badge = document.getElementById('currentUserRoleBadge');
-        badge.textContent = currentUser.role;
-        badge.className = 'badge ' + (currentUser.role === 'Admin' ? 'badge-admin' : 'badge-user');
-
-        document.getElementById('loginView').classList.add('hidden');
-        document.getElementById('appView').classList.remove('hidden');
-        document.getElementById('adminReportsSection').classList.toggle('hidden', currentUser.role !== 'Admin');
-        msg.textContent = '';
-        refreshDashboard();
-      }).withFailureHandler(function(err) {
-        msg.innerHTML = '<span class="danger-text">' + (err && err.message ? err.message : 'Login failed.') + '</span>';
-      }).loginUser(username, password);
+  };
+  const msg = document.getElementById('bookingMessage');
+  msg.textContent = 'Saving booking...';
+  try {
+    const res = await api('saveBooking', payload);
+    if (!res.success) {
+      msg.innerHTML = '<span class="danger-text">' + res.message + '</span>';
+      return;
     }
+    msg.innerHTML = '<span class="success-text">Booking saved successfully. Invoice ' + res.invoiceNo + ' ready.</span>';
+    await refreshDashboard();
+    printInvoice(res.invoice);
+  } catch (error) {
+    msg.innerHTML = '<span class="danger-text">' + error.message + '</span>';
+  }
+}
 
-    function registerUser() {
-      const fullName = document.getElementById('regFullName').value.trim();
-      const username = document.getElementById('regUsername').value.trim();
-      const password = document.getElementById('regPassword').value.trim();
-      const role = document.getElementById('regRole').value;
-      const msg = document.getElementById('registerMessage');
+function clearForm() {
+  ['guestSearch','firstName','lastName','passportOrId','phone','email','nationality','address','checkIn','checkOut','roomType','notes'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('roomNo').value = '';
+  document.getElementById('adults').value = 1;
+  document.getElementById('children').value = 0;
+  document.getElementById('ratePerNight').value = 0;
+  document.getElementById('totalAmount').value = 0;
+  document.getElementById('amountPaid').value = 0;
+  document.getElementById('paymentMethod').value = 'Cash';
+  document.getElementById('guestSearchMessage').textContent = '';
+  document.getElementById('roomStatusMessage').textContent = '';
+  document.getElementById('bookingMessage').textContent = '';
+}
 
-      if (!fullName || !username || !password) {
-        msg.innerHTML = '<span class="warning-text">Complete full name, username and password.</span>';
-        return;
-      }
+function printInvoice(invoice) {
+  const wrap = document.getElementById('invoicePrintArea');
+  wrap.classList.remove('hidden');
+  wrap.innerHTML = `
+    <div style="background:white;padding:24px;border:1px solid #dbe4f0;border-radius:16px;">
+      <h1 style="color:#1f4fbf;margin-top:0;">${invoice.guestHouse}</h1>
+      <h2>Invoice</h2>
+      <table style="width:100%;border-collapse:collapse;">
+        <tr><td><strong>Invoice No</strong></td><td>${invoice.invoiceNo}</td></tr>
+        <tr><td><strong>Booking ID</strong></td><td>${invoice.bookingId}</td></tr>
+        <tr><td><strong>Guest Name</strong></td><td>${invoice.guestName}</td></tr>
+        <tr><td><strong>Passport / ID</strong></td><td>${invoice.passportOrId || ''}</td></tr>
+        <tr><td><strong>Phone</strong></td><td>${invoice.phone || ''}</td></tr>
+        <tr><td><strong>Address</strong></td><td>${invoice.address || ''}</td></tr>
+        <tr><td><strong>Room</strong></td><td>${invoice.roomNo} - ${invoice.roomType}</td></tr>
+        <tr><td><strong>Check In</strong></td><td>${invoice.checkIn}</td></tr>
+        <tr><td><strong>Check Out</strong></td><td>${invoice.checkOut}</td></tr>
+        <tr><td><strong>Nights</strong></td><td>${invoice.nights}</td></tr>
+        <tr><td><strong>Total</strong></td><td>${money(invoice.totalAmount)}</td></tr>
+        <tr><td><strong>Paid</strong></td><td>${money(invoice.amountPaid)}</td></tr>
+        <tr><td><strong>Balance</strong></td><td>${money(invoice.balance)}</td></tr>
+        <tr><td><strong>Payment Method</strong></td><td>${invoice.paymentMethod}</td></tr>
+        <tr><td><strong>Booked By</strong></td><td>${invoice.bookedBy}</td></tr>
+      </table>
+    </div>`;
+  window.print();
+}
 
-      msg.textContent = 'Creating user...';
+async function loadRevenueReport() {
+  const period = document.getElementById('reportPeriod').value;
+  try {
+    const res = await api('getRevenueReport', { period });
+    const summary = res.summary;
+    document.getElementById('reportSummary').innerHTML =
+      '<span class="success-text">' + period.toUpperCase() + ' Revenue:</span> ' +
+      money(summary.totalRevenue) + ' | Bookings: ' + summary.totalBookings +
+      ' | Booked Value: ' + money(summary.totalBookedValue) +
+      ' | Balance: ' + money(summary.totalBalance);
+    renderTable('reportTable', ['Booking ID','Invoice No','Booking Date','Check In','Check Out','Room No','Full Name','Amount Paid','Total Amount','Balance','Payment Method','Booked By'], res.rows);
+  } catch (error) {
+    document.getElementById('reportSummary').innerHTML = '<span class="danger-text">' + error.message + '</span>';
+  }
+}
 
-      google.script.run.withSuccessHandler(function(res) {
-        if (!res || !res.success) {
-          msg.innerHTML = '<span class="danger-text">' + (res && res.message ? res.message : 'Could not create user.') + '</span>';
-          return;
-        }
-        msg.innerHTML = '<span class="success-text">User created successfully.</span>';
-        clearRegistrationForm();
-      }).withFailureHandler(function(err) {
-        msg.innerHTML = '<span class="danger-text">' + (err && err.message ? err.message : 'Could not create user.') + '</span>';
-      }).registerUser({
-        fullName: fullName,
-        username: username,
-        password: password,
-        role: role
-      });
-    }
+async function loadRoomReport() {
+  const period = document.getElementById('reportPeriod').value;
+  try {
+    const res = await api('getRoomBookingReport', { period });
+    document.getElementById('reportSummary').innerHTML = '<span class="success-text">' + period.toUpperCase() + ' Rooms Booked:</span> ' + res.totalRoomsBooked;
+    renderSimpleTable('reportTable', ['Room No', 'Bookings'], res.rows.map(r => [r.roomNo, r.bookings]));
+  } catch (error) {
+    document.getElementById('reportSummary').innerHTML = '<span class="danger-text">' + error.message + '</span>';
+  }
+}
 
-    function clearRegistrationForm() {
-      document.getElementById('regFullName').value = '';
-      document.getElementById('regUsername').value = '';
-      document.getElementById('regPassword').value = '';
-      document.getElementById('regRole').value = 'User';
-    }
+function renderTable(tableId, headers, rows) {
+  const table = document.getElementById(tableId);
+  let html = '<thead><tr>' + headers.map(h => '<th>' + h + '</th>').join('') + '</tr></thead><tbody>';
+  html += (rows || []).map(r => '<tr>' + headers.map(h => '<td>' + (r[h] == null ? '' : r[h]) + '</td>').join('') + '</tr>').join('');
+  html += '</tbody>';
+  table.innerHTML = html;
+}
 
-    function logout() {
-      currentUser = null;
-      document.getElementById('appView').classList.add('hidden');
-      document.getElementById('loginView').classList.remove('hidden');
-      document.getElementById('loginUsername').value = '';
-      document.getElementById('loginPassword').value = '';
-      document.getElementById('loginMessage').textContent = '';
-    }
+function renderSimpleTable(tableId, headers, rows) {
+  const table = document.getElementById(tableId);
+  let html = '<thead><tr>' + headers.map(h => '<th>' + h + '</th>').join('') + '</tr></thead><tbody>';
+  html += (rows || []).map(r => '<tr>' + r.map(c => '<td>' + c + '</td>').join('') + '</tr>').join('');
+  html += '</tbody>';
+  table.innerHTML = html;
+}
 
-    function refreshDashboard() {
-      google.script.run.withSuccessHandler(function(res) {
-        rooms = res.rooms || [];
-        renderRooms();
-        populateRoomsDropdown();
+function downloadTableCsv(tableId, filename) {
+  const table = document.getElementById(tableId);
+  if (!table || !table.rows.length) return;
+  const csv = [];
+  for (let i = 0; i < table.rows.length; i++) {
+    const cols = table.rows[i].querySelectorAll('td, th');
+    const row = [];
+    for (let j = 0; j < cols.length; j++) row.push('"' + cols[j].innerText.replace(/"/g, '""') + '"');
+    csv.push(row.join(','));
+  }
+  const blob = new Blob([csv.join('\n')], { type:'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
 
-        document.getElementById('dailyRevenue').textContent = money(res.todayRevenue.totalRevenue);
-        document.getElementById('dailyBookingsCount').textContent = res.todayRevenue.totalBookings + ' bookings';
-        document.getElementById('weeklyRevenue').textContent = money(res.weekRevenue.totalRevenue);
-        document.getElementById('weeklyBookingsCount').textContent = res.weekRevenue.totalBookings + ' bookings';
-        document.getElementById('monthlyRevenue').textContent = money(res.monthRevenue.totalRevenue);
-        document.getElementById('monthlyBookingsCount').textContent = res.monthRevenue.totalBookings + ' bookings';
-        document.getElementById('yearlyRevenue').textContent = money(res.yearRevenue.totalRevenue);
-        document.getElementById('yearlyBookingsCount').textContent = res.yearRevenue.totalBookings + ' bookings';
-      }).withFailureHandler(function(err) {
-        safeMessage('bookingMessage', '<span class="danger-text">' + (err && err.message ? err.message : 'Could not load dashboard.') + '</span>');
-      }).getDashboardData(currentUser ? currentUser.role : 'User');
-    }
-
-    function renderRooms() {
-      const wrap = document.getElementById('roomsList');
-      if (!rooms.length) {
-        wrap.textContent = 'No rooms found.';
-        return;
-      }
-      wrap.innerHTML = rooms.map(function(r) {
-        return '<span class="room-chip">Room ' + r.roomNo + ' - ' + r.roomType + ' (' + money(r.defaultRate) + ')</span>';
-      }).join('');
-    }
-
-    function populateRoomsDropdown() {
-      const sel = document.getElementById('roomNo');
-      sel.innerHTML = '<option value="">Select room</option>' + rooms.map(function(r) {
-        return '<option value="' + r.roomNo + '" data-type="' + r.roomType + '" data-rate="' + r.defaultRate + '">' + r.roomNo + ' - ' + r.roomType + '</option>';
-      }).join('');
-    }
-
-    function roomChanged() {
-      const sel = document.getElementById('roomNo');
-      const opt = sel.options[sel.selectedIndex];
-      if (!opt || !opt.value) return;
-      document.getElementById('roomType').value = opt.getAttribute('data-type') || '';
-      document.getElementById('ratePerNight').value = opt.getAttribute('data-rate') || 0;
-      calculateTotal();
-      checkRoomAvailability();
-    }
-
-    function calculateTotal() {
-      const checkIn = document.getElementById('checkIn').value;
-      const checkOut = document.getElementById('checkOut').value;
-      const rate = Number(document.getElementById('ratePerNight').value || 0);
-
-      if (!checkIn || !checkOut) {
-        document.getElementById('totalAmount').value = rate;
-        return;
-      }
-
-      const a = new Date(checkIn);
-      const b = new Date(checkOut);
-      let nights = Math.round((b - a) / (1000 * 60 * 60 * 24));
-      if (nights <= 0) nights = 1;
-      document.getElementById('totalAmount').value = nights * rate;
-    }
-
-    function checkRoomAvailability() {
-      const roomNo = document.getElementById('roomNo').value;
-      const checkIn = document.getElementById('checkIn').value;
-      const checkOut = document.getElementById('checkOut').value;
-      const msg = document.getElementById('roomStatusMessage');
-
-      if (!roomNo || !checkIn || !checkOut) {
-        msg.textContent = '';
-        return;
-      }
-
-      google.script.run.withSuccessHandler(function(res) {
-        msg.innerHTML = res.taken ? '<span class="danger-text">Room already taken</span>' : '<span class="success-text">Room available</span>';
-      }).withFailureHandler(function(err) {
-        msg.innerHTML = '<span class="danger-text">' + (err && err.message ? err.message : 'Could not check room.') + '</span>';
-      }).roomIsTaken(roomNo, checkIn, checkOut);
-    }
-
-    function searchGuest() {
-      const q = document.getElementById('guestSearch').value.trim();
-      const msg = document.getElementById('guestSearchMessage');
-
-      if (!q) {
-        msg.innerHTML = '<span class="warning-text">Enter a passport/ID, phone or name.</span>';
-        return;
-      }
-
-      google.script.run.withSuccessHandler(function(res) {
-        if (!res.guest) {
-          msg.innerHTML = '<span class="warning-text">No previous guest found.</span>';
-          return;
-        }
-
-        const g = res.guest;
-        document.getElementById('firstName').value = g['First Name'] || '';
-        document.getElementById('lastName').value = g['Last Name'] || '';
-        document.getElementById('passportOrId').value = g['Passport Or ID'] || '';
-        document.getElementById('phone').value = g['Phone'] || '';
-        document.getElementById('email').value = g['Email'] || '';
-        document.getElementById('address').value = g['Address'] || '';
-        document.getElementById('nationality').value = g['Nationality'] || '';
-        msg.innerHTML = '<span class="success-text">Guest details loaded.</span>';
-      }).withFailureHandler(function(err) {
-        msg.innerHTML = '<span class="danger-text">' + (err && err.message ? err.message : 'Could not search guest.') + '</span>';
-      }).findGuest(q);
-    }
-
-    function saveBooking() {
-      if (!currentUser) return;
-
-      const payload = {
-        roomNo: document.getElementById('roomNo').value,
-        roomType: document.getElementById('roomType').value,
-        checkIn: document.getElementById('checkIn').value,
-        checkOut: document.getElementById('checkOut').value,
-        adults: document.getElementById('adults').value,
-        children: document.getElementById('children').value,
-        ratePerNight: document.getElementById('ratePerNight').value,
-        totalAmount: document.getElementById('totalAmount').value,
-        amountPaid: document.getElementById('amountPaid').value,
-        paymentMethod: document.getElementById('paymentMethod').value,
-        bookedBy: currentUser.fullName || currentUser.username,
-        guest: {
-          firstName: document.getElementById('firstName').value,
-          lastName: document.getElementById('lastName').value,
-          passportOrId: document.getElementById('passportOrId').value,
-          phone: document.getElementById('phone').value,
-          email: document.getElementById('email').value,
-          address: document.getElementById('address').value,
-          nationality: document.getElementById('nationality').value,
-          notes: document.getElementById('notes').value
-        }
-      };
-
-      const msg = document.getElementById('bookingMessage');
-      msg.textContent = 'Saving booking...';
-
-      google.script.run.withSuccessHandler(function(res) {
-        if (!res.success) {
-          msg.innerHTML = '<span class="danger-text">' + res.message + '</span>';
-          return;
-        }
-        msg.innerHTML = '<span class="success-text">Booking saved successfully. Invoice ' + res.invoiceNo + ' ready.</span>';
-        refreshDashboard();
-        printInvoice(res.invoice);
-      }).withFailureHandler(function(err) {
-        msg.innerHTML = '<span class="danger-text">' + (err && err.message ? err.message : 'Could not save booking.') + '</span>';
-      }).saveBooking(payload);
-    }
-
-    function clearForm() {
-      ['guestSearch','firstName','lastName','passportOrId','phone','email','nationality','address','checkIn','checkOut','roomType','notes'].forEach(function(id) {
-        document.getElementById(id).value = '';
-      });
-      document.getElementById('roomNo').value = '';
-      document.getElementById('adults').value = 1;
-      document.getElementById('children').value = 0;
-      document.getElementById('ratePerNight').value = 0;
-      document.getElementById('totalAmount').value = 0;
-      document.getElementById('amountPaid').value = 0;
-      document.getElementById('paymentMethod').value = 'Cash';
-      document.getElementById('guestSearchMessage').textContent = '';
-      document.getElementById('roomStatusMessage').textContent = '';
-      document.getElementById('bookingMessage').textContent = '';
-    }
-
-    function printInvoice(invoice) {
-      const wrap = document.getElementById('invoicePrintArea');
-      wrap.classList.remove('hidden');
-      wrap.innerHTML =
-        '<div style="background:white;padding:24px;border:1px solid #dbe4f0;border-radius:16px;">' +
-        '<h1 style="color:#1f4fbf;">' + invoice.guestHouse + '</h1>' +
-        '<h2>Invoice</h2>' +
-        '<p><strong>Invoice No:</strong> ' + invoice.invoiceNo + '</p>' +
-        '<p><strong>Guest Name:</strong> ' + invoice.guestName + '</p>' +
-        '<p><strong>Room:</strong> ' + invoice.roomNo + ' - ' + invoice.roomType + '</p>' +
-        '<p><strong>Check In:</strong> ' + invoice.checkIn + '</p>' +
-        '<p><strong>Check Out:</strong> ' + invoice.checkOut + '</p>' +
-        '<p><strong>Total:</strong> ' + money(invoice.totalAmount) + '</p>' +
-        '<p><strong>Paid:</strong> ' + money(invoice.amountPaid) + '</p>' +
-        '<p><strong>Balance:</strong> ' + money(invoice.balance) + '</p>' +
-        '</div>';
-      window.print();
-    }
-
-    function loadRevenueReport() {
-      const period = document.getElementById('reportPeriod').value;
-      google.script.run.withSuccessHandler(function(res) {
-        const summary = res.summary;
-        document.getElementById('reportSummary').innerHTML =
-          '<span class="success-text">' + period.toUpperCase() + ' Revenue:</span> ' +
-          money(summary.totalRevenue) + ' | Bookings: ' + summary.totalBookings +
-          ' | Booked Value: ' + money(summary.totalBookedValue) +
-          ' | Balance: ' + money(summary.totalBalance);
-        renderTable('reportTable', ['Booking ID','Invoice No','Booking Date','Check In','Check Out','Room No','Full Name','Amount Paid','Total Amount','Balance','Payment Method','Booked By'], res.rows);
-      }).withFailureHandler(function(err) {
-        document.getElementById('reportSummary').innerHTML = '<span class="danger-text">' + (err && err.message ? err.message : 'Could not load report.') + '</span>';
-      }).getRevenueReport(period);
-    }
-
-    function loadRoomReport() {
-      const period = document.getElementById('reportPeriod').value;
-      google.script.run.withSuccessHandler(function(res) {
-        document.getElementById('reportSummary').innerHTML =
-          '<span class="success-text">' + period.toUpperCase() + ' Rooms Booked:</span> ' + res.totalRoomsBooked;
-        renderSimpleTable('reportTable', ['Room No', 'Bookings'], res.rows.map(function(r) { return [r.roomNo, r.bookings]; }));
-      }).withFailureHandler(function(err) {
-        document.getElementById('reportSummary').innerHTML = '<span class="danger-text">' + (err && err.message ? err.message : 'Could not load room report.') + '</span>';
-      }).getRoomBookingReport(period);
-    }
-
-    function renderTable(tableId, headers, rows) {
-      const table = document.getElementById(tableId);
-      let html = '<thead><tr>' + headers.map(function(h) { return '<th>' + h + '</th>'; }).join('') + '</tr></thead><tbody>';
-      html += rows.map(function(r) {
-        return '<tr>' + headers.map(function(h) { return '<td>' + (r[h] == null ? '' : r[h]) + '</td>'; }).join('') + '</tr>';
-      }).join('');
-      html += '</tbody>';
-      table.innerHTML = html;
-    }
-
-    function renderSimpleTable(tableId, headers, rows) {
-      const table = document.getElementById(tableId);
-      let html = '<thead><tr>' + headers.map(function(h) { return '<th>' + h + '</th>'; }).join('') + '</tr></thead><tbody>';
-      html += rows.map(function(r) {
-        return '<tr>' + r.map(function(c) { return '<td>' + c + '</td>'; }).join('') + '</tr>';
-      }).join('');
-      html += '</tbody>';
-      table.innerHTML = html;
-    }
-
-    function downloadTableCsv(tableId, filename) {
-      const table = document.getElementById(tableId);
-      if (!table || !table.rows.length) return;
-      const csv = [];
-      for (let i = 0; i < table.rows.length; i++) {
-        const cols = table.rows[i].querySelectorAll('td, th');
-        const row = [];
-        for (let j = 0; j < cols.length; j++) {
-          row.push('"' + cols[j].innerText.replace(/"/g, '""') + '"');
-        }
-        csv.push(row.join(','));
-      }
-      const blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-
-    checkConnection();
-  </script>
+checkConnection();
+</script>
 </body>
 </html>
